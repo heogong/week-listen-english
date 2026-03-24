@@ -1,0 +1,22 @@
+[
+  {
+    "id": "daily-life-1774319453862",
+    "title": "The Intricacies of Modern Urban Living",
+    "topic": "Daily Life",
+    "level": "advanced",
+    "hasAudio": true
+  },
+  {
+    "id": "daily-life-1774318485953",
+    "title": "My Daily Routine",
+    "topic": "Daily Life",
+    "level": "beginner",
+    "hasAudio": true
+  },
+  {
+    "id": "sarah-daily",
+    "title": "Sarah's Daily Life",
+    "topic": "Daily Life",
+    "level": "beginner"
+  }
+]

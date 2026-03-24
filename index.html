@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listen</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preload" href="./scripts/index.json" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="./scripts/sarah-daily.json" as="fetch" crossorigin="anonymous">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f5f2ec; color: #1a1a1a;
+  font-family: 'IBM Plex Sans', sans-serif;
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; padding: 40px 24px 110px;
+  transition: background 0.4s;
+}
+
+body.img-mode { background: #111; }
+body.img-mode .logo { color: rgba(245,242,236,0.35); }
+body.img-mode .btn { opacity: 0.5; }
+body.img-mode .mode-bar { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.07); }
+body.img-mode .mode-btn { color: rgba(255,255,255,0.28); }
+body.img-mode .mode-btn.active { background: rgba(255,255,255,0.12); color: #f5f2ec; }
+body.img-mode .sentence-block { filter: blur(10px); pointer-events: none; user-select: none; }
+body.img-mode .script-list { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+body.img-mode .script-item { border-color: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); }
+body.ko-hide .sentence-ko { display: none; }
+
+/* ── Top ── */
+.top {
+  width: 100%; max-width: 660px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.logo { font-family: 'Lora', serif; font-size: 1.05rem; letter-spacing: -0.01em; transition: color 0.4s; }
+.top-right { display: flex; gap: 8px; }
+
+.btn {
+  background: #1a1a1a; color: #f5f2ec; border: none;
+  padding: 8px 16px; border-radius: 100px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.8rem; font-weight: 500; cursor: pointer;
+  transition: opacity 0.15s; display: flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.btn:hover { opacity: 0.72; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn.ghost {
+  background: transparent; border: 1px solid rgba(26,26,26,0.18); color: #666;
+}
+.btn.ghost:hover { border-color: #1a1a1a; color: #1a1a1a; opacity: 1; }
+
+/* ── Script list ── */
+.script-list {
+  width: 100%; max-width: 660px;
+  background: #fff; border: 1px solid rgba(26,26,26,0.1);
+  border-radius: 12px; margin-bottom: 18px;
+  overflow: hidden; display: none;
+}
+.script-list.open { display: block; }
+.list-header {
+  padding: 12px 18px; font-size: 0.73rem; font-weight: 500;
+  color: #999; text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(26,26,26,0.07);
+}
+.script-item {
+  padding: 13px 18px; border-bottom: 1px solid rgba(26,26,26,0.06);
+  cursor: pointer; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.script-item:last-child { border-bottom: none; }
+.script-item:hover { background: rgba(26,26,26,0.03); }
+.script-item.active { background: rgba(26,26,26,0.05); }
+.si-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 2px; }
+.si-meta { font-size: 0.73rem; color: #999; display: flex; gap: 10px; }
+
+/* ── Mode bar ── */
+.mode-bar {
+  width: 100%; max-width: 660px;
+  display: flex; gap: 6px;
+  background: rgba(26,26,26,0.06); border: 1px solid rgba(26,26,26,0.08);
+  border-radius: 100px; padding: 4px; margin-bottom: 22px;
+  transition: background 0.4s, border-color 0.4s;
+}
+.mode-btn {
+  flex: 1; background: transparent; border: none;
+  color: #888; padding: 8px 0; border-radius: 100px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.mode-btn:hover { color: #1a1a1a; }
+.mode-btn.active { background: #1a1a1a; color: #f5f2ec; }
+
+/* ── Status ── */
+.status-bar {
+  width: 100%; max-width: 660px;
+  font-size: 0.78rem; color: #999;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px; min-height: 18px;
+}
+.sdot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; flex-shrink: 0; }
+.sdot.green { background: #4caf50; }
+.sdot.yellow { background: #ff9800; animation: pulse 1s infinite; }
+.sdot.red { background: #f44336; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── Script ── */
+.script-area { width: 100%; max-width: 660px; }
+
+.sentence-block {
+  margin-bottom: 20px; border-radius: 8px;
+  padding: 10px 12px; margin-left: -12px;
+  transition: background 0.2s; cursor: pointer;
+}
+.sentence-block:hover:not(.active-sent) { background: rgba(26,26,26,0.04); }
+.sentence-block.active-sent { background: rgba(26,26,26,0.05); }
+body.img-mode .sentence-block.active-sent { background: rgba(255,255,255,0.04); }
+
+.sentence-en {
+  font-family: 'Lora', serif; font-size: 1.18rem; line-height: 1.85;
+  color: #aaa8a2; margin-bottom: 4px; transition: color 0.2s;
+}
+.sentence-block.active-sent .sentence-en { color: #000; }
+.sentence-ko {
+  font-size: 0.85rem; line-height: 1.6;
+  color: #ccc8c0; font-weight: 300; transition: color 0.2s;
+}
+.sentence-block.active-sent .sentence-ko { color: #7a6a58; }
+.para-break { height: 14px; }
+.placeholder { color: #bbb; font-size: 0.9rem; padding: 48px 0; text-align: center; }
+
+.shimmer {
+  height: 1.3rem; border-radius: 4px; margin-bottom: 14px;
+  background: linear-gradient(90deg,#e8e4dc 25%,#edeae2 50%,#e8e4dc 75%);
+  background-size: 200% 100%; animation: sh 1.4s infinite;
+}
+@keyframes sh { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+/* ── Player ── */
+.player {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #1a1a1a;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 28px 22px; gap: 20px;
+}
+.prog-wrap { flex: 1; max-width: 420px; display: flex; flex-direction: column; gap: 6px; }
+.prog-track {
+  width: 100%; height: 2px; background: rgba(255,255,255,0.1);
+  border-radius: 2px; cursor: pointer;
+}
+.prog-fill {
+  height: 100%; background: #f5f2ec; border-radius: 2px;
+  pointer-events: none; transition: width 0.05s linear;
+}
+.times {
+  display: flex; justify-content: space-between;
+  font-size: 0.68rem; color: rgba(245,242,236,0.28);
+  font-variant-numeric: tabular-nums;
+}
+.play-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: #f5f2ec; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: transform 0.15s;
+}
+.play-btn:hover { transform: scale(1.08); }
+.play-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+.play-btn svg { width: 19px; height: 19px; fill: #1a1a1a; }
+</style>
+</head>
+<body>
+
+<!-- Top -->
+<div class="top">
+  <div class="logo">Listen</div>
+  <div class="top-right">
+    <button class="btn ghost" onclick="toggleList()" id="listBtn">📂 목록</button>
+  </div>
+</div>
+
+<!-- Script list -->
+<div class="script-list" id="scriptList">
+  <div class="list-header">스크립트 목록</div>
+  <div id="listBody"></div>
+</div>
+
+<!-- Mode bar -->
+<div class="mode-bar">
+  <button class="mode-btn active" id="mNormal"  onclick="setMode('normal')">📖 일반</button>
+  <button class="mode-btn"        id="mKoHide"  onclick="setMode('kohide')">👁 한글숨김</button>
+  <button class="mode-btn"        id="mImage"   onclick="setMode('image')">🧠 이미지</button>
+</div>
+
+<!-- Status -->
+<div class="status-bar">
+  <div class="sdot" id="sdot"></div>
+  <span id="statusTxt">스크립트를 선택해주세요</span>
+</div>
+
+<!-- Script area -->
+<div class="script-area" id="scriptArea">
+  <div class="placeholder">📂 목록에서 스크립트를 선택하세요</div>
+</div>
+
+<!-- Player -->
+<div class="player">
+  <button class="play-btn" id="playBtn" onclick="togglePlay()" disabled>
+    <svg id="playIco" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <div class="prog-wrap">
+    <div class="prog-track" id="prog" onclick="seekTo(event)">
+      <div class="prog-fill" id="fill" style="width:0%"></div>
+    </div>
+    <div class="times"><span id="tE">0:00</span><span id="tT">0:00</span></div>
+  </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────
+const RAW_BASE = '.';
+
+// ── State ─────────────────────────────────────────────────────────
+let currentId = null;
+let sentences = [];
+let totalDur = 0, mode = 'normal';
+let audioCtx = null, audioSrc = null, audioBuffer = null;
+let audioStart = 0, audioPaused = 0, audioPlaying = false, audioRaf = null;
+let scriptIndex = [];
+
+// ── Script list ───────────────────────────────────────────────────
+async function toggleList() {
+  const el = document.getElementById('scriptList');
+  const open = el.classList.toggle('open');
+  if (open && scriptIndex.length === 0) await loadIndex();
+}
+
+async function loadIndex() {
+  const body = document.getElementById('listBody');
+  body.innerHTML = '<div style="padding:13px 18px;font-size:.82rem;color:#999">불러오는 중...</div>';
+  try {
+    const res = await fetch(`${RAW_BASE}/scripts/index.json`);
+    if (!res.ok) throw new Error('index.json 로드 실패');
+    scriptIndex = await res.json();
+    renderList();
+  } catch (e) {
+    body.innerHTML = `<div style="padding:13px 18px;font-size:.82rem;color:#c00">${e.message}</div>`;
+  }
+}
+
+function renderList() {
+  document.getElementById('listBody').innerHTML = scriptIndex.map(s => `
+    <div class="script-item ${s.id === currentId ? 'active' : ''}" onclick="loadScript('${s.id}')">
+      <div class="si-title">${s.title}</div>
+      <div class="si-meta"><span>${s.level}</span><span>${s.topic}</span></div>
+    </div>
+  `).join('');
+}
+
+// ── Load script ───────────────────────────────────────────────────
+async function loadScript(id) {
+  currentId = id;
+  document.getElementById('scriptList').classList.remove('open');
+  stopAudio(); audioBuffer = null; audioPaused = 0;
+  document.getElementById('playBtn').disabled = true;
+  resetProgress();
+  setStatus('불러오는 중...', 'yellow');
+  document.getElementById('scriptArea').innerHTML =
+    `<div class="shimmer" style="width:100%"></div>
+     <div class="shimmer" style="width:88%"></div>
+     <div class="shimmer" style="width:94%"></div>`;
+
+  try {
+    const res = await fetch(`${RAW_BASE}/scripts/${id}.json`);
+    if (!res.ok) throw new Error('스크립트 로드 실패');
+    const data = await res.json();
+    renderScript(data.sentences || []);
+    setStatus('음성 불러오는 중...', 'yellow');
+    await fetchAudio(id);
+    setStatus(`${data.title} — 재생 준비 완료`, 'green');
+  } catch (e) {
+    document.getElementById('scriptArea').innerHTML = `<div class="placeholder">${e.message}</div>`;
+    setStatus('로드 실패', 'red');
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────
+function renderScript(data) {
+  const area = document.getElementById('scriptArea');
+  area.innerHTML = ''; sentences = [];
+  data.forEach(item => {
+    if (item.p || item.paragraphStart) {
+      if (area.children.length > 0)
+        area.appendChild(Object.assign(document.createElement('div'), { className: 'para-break' }));
+      return;
+    }
+    const block = document.createElement('div');
+    block.className = 'sentence-block';
+    block.innerHTML = `<div class="sentence-en">${item.en}</div><div class="sentence-ko">${item.ko}</div>`;
+    area.appendChild(block);
+    const si = sentences.length;
+    block.onclick = () => jumpTo(si);
+    sentences.push({ en: item.en, el: block, startTime: 0, endTime: 0 });
+  });
+}
+
+// ── Audio ─────────────────────────────────────────────────────────
+async function fetchAudio(id) {
+  // audio/ 폴더에 mp3가 있으면 로드 (GitHub Pages에서 서빙)
+  const res = await fetch(`${RAW_BASE}/audio/${id}.mp3`);
+  if (!res.ok) throw new Error('음성 파일 없음');
+  const buf = await res.arrayBuffer();
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioBuffer = await audioCtx.decodeAudioData(buf);
+  setupTimings();
+  document.getElementById('playBtn').disabled = false;
+}
+
+function setupTimings() {
+  totalDur = audioBuffer.duration;
+  const totalChars = sentences.reduce((a, s) => a + s.en.length, 0);
+  let t = 0;
+  sentences.forEach(s => {
+    s.startTime = t;
+    t += (s.en.length / totalChars) * totalDur;
+    s.endTime = t;
+  });
+  document.getElementById('tT').textContent = fmt(totalDur);
+}
+
+function audioPlay(from) {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  cancelAnimationFrame(audioRaf);
+  if (audioSrc) { audioSrc.onended = null; try { audioSrc.stop(); } catch(e){} audioSrc = null; }
+  const f = from !== undefined ? from : (audioPaused || 0);
+  audioPaused = 0;
+  audioStart = audioCtx.currentTime - f;
+  audioSrc = audioCtx.createBufferSource();
+  audioSrc.buffer = audioBuffer;
+  audioSrc.connect(audioCtx.destination);
+  audioSrc.start(0, f);
+  audioSrc.onended = () => { if (audioPlaying) audioPlay(0); };
+  audioPlaying = true; setIco(true); audioTick();
+}
+
+function audioPause() {
+  if (audioCtx) audioPaused = audioCtx.currentTime - audioStart;
+  if (audioSrc) { audioSrc.onended = null; try { audioSrc.stop(); } catch(e){} audioSrc = null; }
+  audioPlaying = false; cancelAnimationFrame(audioRaf); setIco(false);
+}
+
+function stopAudio() {
+  audioPause(); audioPaused = 0;
+}
+
+function audioTick() {
+  const e = audioCtx.currentTime - audioStart;
+  document.getElementById('fill').style.width = Math.min(e / totalDur * 100, 100) + '%';
+  document.getElementById('tE').textContent = fmt(Math.min(e, totalDur));
+  hlSentence(sentenceAtTime(e));
+  if (audioPlaying) audioRaf = requestAnimationFrame(audioTick);
+}
+
+// ── Controls ──────────────────────────────────────────────────────
+function togglePlay() {
+  if (!audioBuffer) return;
+  audioPlaying ? audioPause() : audioPlay();
+}
+
+function seekTo(ev) {
+  if (!totalDur) return;
+  const r = ev.currentTarget.getBoundingClientRect();
+  audioPlay(Math.max(0, Math.min((ev.clientX - r.left) / r.width, 1)) * totalDur);
+}
+
+function jumpTo(idx) {
+  if (sentences[idx] && audioBuffer) audioPlay(sentences[idx].startTime);
+}
+
+function hlSentence(idx) {
+  sentences.forEach((s, i) => s.el.classList.toggle('active-sent', i === idx));
+  if (mode !== 'image' && sentences[idx])
+    sentences[idx].el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function sentenceAtTime(t) {
+  for (let i = sentences.length - 1; i >= 0; i--)
+    if (t >= sentences[i].startTime) return i;
+  return 0;
+}
+
+function setMode(m) {
+  mode = m;
+  ['mNormal','mKoHide','mImage'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById({ normal:'mNormal', kohide:'mKoHide', image:'mImage' }[m]).classList.add('active');
+  document.body.classList.toggle('img-mode', m === 'image');
+  document.body.classList.toggle('ko-hide', m === 'kohide');
+}
+
+function setIco(p) {
+  document.getElementById('playIco').innerHTML = p
+    ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+    : '<path d="M8 5v14l11-7z"/>';
+}
+
+function setStatus(msg, state = '') {
+  document.getElementById('statusTxt').textContent = msg;
+  document.getElementById('sdot').className = 'sdot' + (state ? ' ' + state : '');
+}
+
+function resetProgress() {
+  document.getElementById('fill').style.width = '0%';
+  document.getElementById('tE').textContent = '0:00';
+  document.getElementById('tT').textContent = '0:00';
+}
+
+function fmt(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m}:${String(sec).padStart(2,'0')}`; }
+
+// ── Init ──────────────────────────────────────────────────────────
+// 페이지 로드 시 목록 미리 로드
+loadIndex().then(() => {
+  // 첫 번째 스크립트 자동 선택
+  if (scriptIndex.length > 0) loadScript(scriptIndex[0].id);
+});
+window.addEventListener('beforeunload', () => { if (audioSrc) try { audioSrc.stop(); } catch(e){} });
+</script>
+</body>
+</html>

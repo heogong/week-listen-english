@@ -1,0 +1,218 @@
+{
+  "title": "My Daily Routine",
+  "topic": "Daily Life",
+  "level": "beginner",
+  "sentences": [
+    {
+      "p": true
+    },
+    {
+      "en": "I wake up at seven o'clock every morning.",
+      "ko": "나는 매일 아침 7시에 일어납니다."
+    },
+    {
+      "en": "First, I brush my teeth and wash my face.",
+      "ko": "먼저 양치질하고 세수를 합니다."
+    },
+    {
+      "en": "Then I take a quick shower.",
+      "ko": "그 다음 간단히 샤워를 합니다."
+    },
+    {
+      "en": "I get dressed and comb my hair.",
+      "ko": "옷을 입고 머리를 빗습니다."
+    },
+    {
+      "en": "After that, I go to the kitchen.",
+      "ko": "그 후에 부엌으로 갑니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "I make breakfast for my family.",
+      "ko": "가족을 위해 아침을 만듭니다."
+    },
+    {
+      "en": "We usually eat toast and eggs.",
+      "ko": "우리는 보통 토스트와 달걀을 먹습니다."
+    },
+    {
+      "en": "I drink coffee with milk.",
+      "ko": "나는 우유를 넣은 커피를 마십니다."
+    },
+    {
+      "en": "My children drink orange juice.",
+      "ko": "아이들은 오렌지 주스를 마십니다."
+    },
+    {
+      "en": "We talk about our plans for the day.",
+      "ko": "우리는 하루 계획에 대해 이야기합니다."
+    },
+    {
+      "en": "Breakfast time is always nice.",
+      "ko": "아침 시간은 항상 좋습니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "At eight-thirty, I leave for work.",
+      "ko": "8시 30분에 출근합니다."
+    },
+    {
+      "en": "I drive my car to the office.",
+      "ko": "차를 몰고 사무실로 갑니다."
+    },
+    {
+      "en": "The drive takes about twenty minutes.",
+      "ko": "운전하는 데 약 20분 걸립니다."
+    },
+    {
+      "en": "I listen to music in the car.",
+      "ko": "차에서 음악을 듣습니다."
+    },
+    {
+      "en": "Sometimes I listen to the news.",
+      "ko": "때때로 뉴스를 듣습니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "I work from nine to five.",
+      "ko": "9시부터 5시까지 일합니다."
+    },
+    {
+      "en": "I have many meetings during the day.",
+      "ko": "하루 동안 회의가 많습니다."
+    },
+    {
+      "en": "I eat lunch with my coworkers.",
+      "ko": "동료들과 함께 점심을 먹습니다."
+    },
+    {
+      "en": "We go to a restaurant near our office.",
+      "ko": "사무실 근처 식당에 갑니다."
+    },
+    {
+      "en": "I usually order a salad or sandwich.",
+      "ko": "보통 샐러드나 샌드위치를 주문합니다."
+    },
+    {
+      "en": "After lunch, I feel more energetic.",
+      "ko": "점심 후에는 더 활기가 납니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "I finish work at five o'clock.",
+      "ko": "5시에 일을 마칩니다."
+    },
+    {
+      "en": "I drive home through the city.",
+      "ko": "도시를 통해 집으로 운전합니다."
+    },
+    {
+      "en": "Traffic is usually heavy in the evening.",
+      "ko": "저녁에는 보통 교통이 많이 막힙니다."
+    },
+    {
+      "en": "I arrive home around six o'clock.",
+      "ko": "6시쯤 집에 도착합니다."
+    },
+    {
+      "en": "My family is happy to see me.",
+      "ko": "가족들이 나를 보고 기뻐합니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "We prepare dinner together.",
+      "ko": "함께 저녁을 준비합니다."
+    },
+    {
+      "en": "My wife cooks the main dish.",
+      "ko": "아내가 메인 요리를 합니다."
+    },
+    {
+      "en": "I help with the vegetables.",
+      "ko": "나는 야채 준비를 돕습니다."
+    },
+    {
+      "en": "Our children set the table.",
+      "ko": "아이들이 식탁을 차립니다."
+    },
+    {
+      "en": "We eat dinner at seven o'clock.",
+      "ko": "7시에 저녁을 먹습니다."
+    },
+    {
+      "en": "We share stories about our day.",
+      "ko": "하루 있었던 이야기를 나눕니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "After dinner, we relax together.",
+      "ko": "저녁 후에는 함께 휴식합니다."
+    },
+    {
+      "en": "Sometimes we watch TV.",
+      "ko": "때때로 TV를 봅니다."
+    },
+    {
+      "en": "The children do their homework.",
+      "ko": "아이들은 숙제를 합니다."
+    },
+    {
+      "en": "I help them when they need it.",
+      "ko": "필요할 때 도와줍니다."
+    },
+    {
+      "en": "We also play games together.",
+      "ko": "함께 게임도 합니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "At ten o'clock, we get ready for bed.",
+      "ko": "10시에 잠자리 준비를 합니다."
+    },
+    {
+      "en": "The children brush their teeth.",
+      "ko": "아이들이 양치질을 합니다."
+    },
+    {
+      "en": "I read them a bedtime story.",
+      "ko": "아이들에게 잠자리 동화를 읽어줍니다."
+    },
+    {
+      "en": "They go to sleep at ten-thirty.",
+      "ko": "10시 30분에 잠자리에 듭니다."
+    },
+    {
+      "p": true
+    },
+    {
+      "en": "I read a book before sleeping.",
+      "ko": "잠들기 전에 책을 읽습니다."
+    },
+    {
+      "en": "My wife and I talk about tomorrow.",
+      "ko": "아내와 내일에 대해 이야기합니다."
+    },
+    {
+      "en": "We go to bed at eleven o'clock.",
+      "ko": "11시에 잠자리에 듭니다."
+    },
+    {
+      "en": "I feel happy about my daily life.",
+      "ko": "나는 일상이 행복합니다."
+    }
+  ]
+}

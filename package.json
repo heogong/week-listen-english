@@ -1,0 +1,13 @@
+{
+  "name": "listen-app",
+  "version": "1.0.0",
+  "description": "English listening practice app",
+  "scripts": {
+    "dev": "npx serve .",
+    "generate": "node generate.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0",
+    "dotenv": "^16.3.1"
+  }
+}

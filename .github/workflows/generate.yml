@@ -1,0 +1,39 @@
+name: Generate Script & TTS
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Topic (e.g. Travel, Science, Food)'
+        required: true
+        default: 'Daily Life'
+      level:
+        description: 'Level (beginner / intermediate / advanced)'
+        required: true
+        default: 'beginner'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm install
+
+      - name: Generate script & TTS
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node generate.js --topic "${{ github.event.inputs.topic }}" --level "${{ github.event.inputs.level }}"
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/ audio/
+          git diff --cached --quiet || git commit -m "add: ${{ github.event.inputs.topic }} (${{ github.event.inputs.level }})"
+          git push
