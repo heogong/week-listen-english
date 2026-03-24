@@ -32,6 +32,9 @@ function splitChunks(text, maxLen = 4096) {
   return chunks;
 }
 
+const VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
+const voice = VOICES[Math.floor(Math.random() * VOICES.length)];
+
 async function ttsChunk(text) {
   const res = await fetch('https://api.openai.com/v1/audio/speech', {
     method: 'POST',
@@ -39,7 +42,7 @@ async function ttsChunk(text) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
     },
-    body: JSON.stringify({ model: 'tts-1', voice: 'nova', input: text, response_format: 'mp3' }),
+    body: JSON.stringify({ model: 'tts-1', voice, input: text, response_format: 'mp3' }),
   });
   if (!res.ok) {
     const err = await res.json();
@@ -51,7 +54,7 @@ async function ttsChunk(text) {
 async function generateTTS(text, outputPath) {
   if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY가 .env에 없습니다');
   const chunks = splitChunks(text);
-  console.log(`🔊 Generating TTS... (${chunks.length} chunk${chunks.length > 1 ? 's' : ''})`);
+  console.log(`🔊 Generating TTS... voice: ${voice} (${chunks.length} chunk${chunks.length > 1 ? 's' : ''})`);
   const buffers = [];
   for (let i = 0; i < chunks.length; i++) {
     if (chunks.length > 1) process.stdout.write(`   Chunk ${i + 1}/${chunks.length}...\r`);
