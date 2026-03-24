@@ -244,6 +244,7 @@ let audioCtx = null, audioSrc = null, audioBuffer = null;
 let audioStart = 0, audioPaused = 0, audioPlaying = false, audioRaf = null;
 let scriptIndex = [];
 let userScrolling = false, scrollTimer = null;
+let lastSentenceIdx = -1;
 
 // ── Script list ───────────────────────────────────────────────────
 async function toggleList() {
@@ -278,7 +279,7 @@ function renderList() {
 async function loadScript(id) {
   currentId = id;
   document.getElementById('scriptList').classList.remove('open');
-  stopAudio(); audioBuffer = null; audioPaused = 0;
+  stopAudio(); audioBuffer = null; audioPaused = 0; lastSentenceIdx = -1;
   document.getElementById('playBtn').disabled = true;
   resetProgress();
   setStatus('불러오는 중...', 'yellow');
@@ -394,10 +395,29 @@ function jumpTo(idx) {
   if (sentences[idx] && audioBuffer) audioPlay(sentences[idx].startTime);
 }
 
+let scrollRaf = null;
+function smoothScrollTo(targetY, duration = 600) {
+  cancelAnimationFrame(scrollRaf);
+  const startY = window.scrollY;
+  const diff = targetY - startY;
+  const start = performance.now();
+  const ease = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease-in-out
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    window.scrollTo(0, startY + diff * ease(t));
+    if (t < 1) scrollRaf = requestAnimationFrame(step);
+  }
+  scrollRaf = requestAnimationFrame(step);
+}
+
 function hlSentence(idx) {
   sentences.forEach((s, i) => s.el.classList.toggle('active-sent', i === idx));
-  if (mode !== 'image' && sentences[idx] && !userScrolling)
-    sentences[idx].el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (mode !== 'image' && sentences[idx] && !userScrolling && idx !== lastSentenceIdx) {
+    const el = sentences[idx].el;
+    const elCenter = el.getBoundingClientRect().top + window.scrollY + el.offsetHeight / 2;
+    smoothScrollTo(elCenter - window.innerHeight / 2, 600);
+    lastSentenceIdx = idx;
+  }
 }
 
 function sentenceAtTime(t) {
