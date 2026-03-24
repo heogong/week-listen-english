@@ -1,6 +1,6 @@
 # 🎧 Listen App
 
-영어 듣기 학습 서비스 — 완전 정적, 서버 없음
+영어 듣기 학습 서비스
 
 ## 구조
 
@@ -17,19 +17,6 @@ listen-app/
 └── .env                    # ANTHROPIC_API_KEY
 ```
 
-## GitHub Pages 배포
-
-```bash
-git init
-git add .
-git commit -m "init"
-git remote add origin https://github.com/<your>/<repo>.git
-git push -u origin main
-
-# GitHub 레포 → Settings → Pages → Source: main branch → Save
-# → https://<your>.github.io/<repo>/ 접속
-```
-
 ## 새 스크립트 AI 생성
 
 ```bash
@@ -40,8 +27,6 @@ node generate.js --topic "Travel" --level "beginner"
 node generate.js --topic "Technology" --level "intermediate"
 node generate.js --topic "Climate Change" --level "advanced"
 
-# scripts/ 폴더에 JSON + index.json 자동 업데이트
-git add scripts/ && git commit -m "add script" && git push
 ```
 
 ## TTS mp3 캐시 (선택)
