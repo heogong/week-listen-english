@@ -21,7 +21,7 @@ listen-app/
 
 ```bash
 npm install
-cp .env.example .env    # ANTHROPIC_API_KEY 입력
+cp .env   # ANTHROPIC_API_KEY 입력
 
 node generate.js --topic "Travel" --level "beginner"
 node generate.js --topic "Technology" --level "intermediate"
