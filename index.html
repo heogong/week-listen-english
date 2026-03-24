@@ -44,7 +44,7 @@ body.ko-hide .sentence-ko { display: none; }
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 18px;
 }
-.logo { font-family: 'Lora', serif; font-size: 1.05rem; letter-spacing: -0.01em; transition: color 0.4s; }
+.logo { display: flex; align-items: center; transition: color 0.4s; color: #1a1a1a; }
 .top-right { display: flex; gap: 8px; }
 
 .btn {
@@ -76,15 +76,15 @@ body.ko-hide .sentence-ko { display: none; }
   border-bottom: 1px solid rgba(26,26,26,0.07);
 }
 .list-footer {
-  padding: 13px 18px; font-size: 0.73rem; color: #bbb;
-  border-top: 1px solid rgba(26,26,26,0.06); line-height: 1.8;
+  padding: 14px 18px; font-size: 0.78rem; color: #666;
+  background: rgba(26,26,26,0.03);
+  border-top: 1px solid rgba(26,26,26,0.07); line-height: 1.9;
 }
-.list-footer a { color: #999; text-decoration: none; }
-.list-footer a:hover { color: #1a1a1a; }
+.list-footer a { color: #1a1a1a; font-weight: 500; text-decoration: underline; text-underline-offset: 2px; }
+.list-footer a:hover { opacity: 0.6; }
 .script-item {
   padding: 13px 18px; border-bottom: 1px solid rgba(26,26,26,0.06);
   cursor: pointer; transition: background 0.15s;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .script-item:last-child { border-bottom: none; }
 .script-item:hover { background: rgba(26,26,26,0.03); }
@@ -194,7 +194,17 @@ body.img-mode .sentence-block.active-sent { background: rgba(255,255,255,0.04); 
 
 <!-- Top -->
 <div class="top">
-  <div class="logo">just listen</div>
+  <div class="logo">
+    <svg viewBox="0 0 130 28" height="22" xmlns="http://www.w3.org/2000/svg" aria-label="just listen">
+      <!-- 헤드폰 마크 -->
+      <path d="M11 6C7.13 6 4 9.13 4 13v5c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-3c0-.55-.45-1-1-1H6v-1c0-2.76 2.24-5 5-5s5 2.24 5 5v1h-1c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-5c0-3.87-3.13-7-7-7z" fill="currentColor"/>
+      <!-- just listen 텍스트 -->
+      <text x="26" y="19"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="14" font-weight="400" letter-spacing="0.3"
+        fill="currentColor">Just Listen</text>
+    </svg>
+  </div>
   <div class="top-right">
     <button class="btn ghost" onclick="toggleList()" id="listBtn">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" width="14" height="14"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
