@@ -33,7 +33,7 @@ function splitChunks(text, maxLen = 4096) {
   return chunks;
 }
 
-const VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
+const VOICES = ['alloy', 'ash', 'echo', 'sage', 'fable', 'onyx', 'sage', 'nova', 'shimmer'];
 const voice = VOICES[Math.floor(Math.random() * VOICES.length)];
 
 async function ttsChunk(text) {
