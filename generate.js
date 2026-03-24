@@ -13,6 +13,7 @@ const get = (flag, def) => {
 const topic = get('--topic', 'Daily Life');
 const level = get('--level', 'beginner');  // beginner | intermediate | advanced
 const id    = get('--id', `${topic.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`);
+const scriptOnly = get('--script', null);  // TTS 전용 모드: 기존 스크립트 id
 
 // ── Anthropic 클라이언트 ──────────────────────────────────────────
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -99,24 +100,37 @@ Rules:
 }
 
 async function generate() {
-  console.log(`\n🎧 Generating script...`);
-  console.log(`   Topic : ${topic}`);
-  console.log(`   Level : ${level}`);
-  console.log(`   ID    : ${id}\n`);
-
   let data;
-  let scriptId = id;
+  let scriptId;
 
-  try {
-    data = await generateScript();
+  if (scriptOnly) {
+    // TTS 전용 모드
+    scriptId = scriptOnly;
+    console.log(`\n🔊 TTS only mode`);
+    console.log(`   Script: ${scriptId}\n`);
     const scriptPath = path.join(__dirname, 'scripts', `${scriptId}.json`);
-    fs.writeFileSync(scriptPath, JSON.stringify(data, null, 2), 'utf-8');
-    console.log(`✓ Saved: scripts/${scriptId}.json`);
-  } catch (e) {
-    console.warn(`⚠ Anthropic 오류: ${e.message}`);
-    console.warn(`→ fallback: scripts/${FALLBACK_ID}.json 으로 TTS 진행\n`);
-    scriptId = FALLBACK_ID;
-    data = JSON.parse(fs.readFileSync(path.join(__dirname, 'scripts', `${FALLBACK_ID}.json`), 'utf-8'));
+    if (!fs.existsSync(scriptPath)) throw new Error(`scripts/${scriptId}.json 파일이 없습니다`);
+    data = JSON.parse(fs.readFileSync(scriptPath, 'utf-8'));
+    console.log(`✓ Loaded: scripts/${scriptId}.json`);
+  } else {
+    // AI 스크립트 생성 모드
+    scriptId = id;
+    console.log(`\n🎧 Generating script...`);
+    console.log(`   Topic : ${topic}`);
+    console.log(`   Level : ${level}`);
+    console.log(`   ID    : ${id}\n`);
+
+    try {
+      data = await generateScript();
+      const scriptPath = path.join(__dirname, 'scripts', `${scriptId}.json`);
+      fs.writeFileSync(scriptPath, JSON.stringify(data, null, 2), 'utf-8');
+      console.log(`✓ Saved: scripts/${scriptId}.json`);
+    } catch (e) {
+      console.warn(`⚠ Anthropic 오류: ${e.message}`);
+      console.warn(`→ fallback: scripts/${FALLBACK_ID}.json 으로 TTS 진행\n`);
+      scriptId = FALLBACK_ID;
+      data = JSON.parse(fs.readFileSync(path.join(__dirname, 'scripts', `${FALLBACK_ID}.json`), 'utf-8'));
+    }
   }
 
   // TTS 생성
@@ -125,7 +139,7 @@ async function generate() {
   await generateTTS(fullText, audioPath);
   console.log(`✓ Saved: audio/${scriptId}.mp3`);
 
-  // scripts/index.json 자동 업데이트 (새 스크립트인 경우만)
+  // scripts/index.json 자동 업데이트 (FALLBACK_ID 제외, index에 없는 경우만)
   if (scriptId !== FALLBACK_ID) {
     const indexPath = path.join(__dirname, 'scripts', 'index.json');
     const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
@@ -133,8 +147,8 @@ async function generate() {
       const createdAt = new Date().toISOString().slice(0, 10);
       index.unshift({ id: scriptId, title: data.title, level: data.level, hasAudio: true, createdAt });
       fs.writeFileSync(indexPath, JSON.stringify(index, null, 2), 'utf-8');
+      console.log(`✓ Updated: scripts/index.json`);
     }
-    console.log(`✓ Updated: scripts/index.json`);
   }
 
   const sentenceCount = data.sentences.filter(s => s.en).length;
