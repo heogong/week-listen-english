@@ -21,7 +21,7 @@ body {
 body.img-mode { background: #111; }
 body.img-mode .logo { color: rgba(245,242,236,0.35); }
 body.img-mode .btn { opacity: 0.5; }
-body.img-mode .mode-bar { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.07); }
+body.img-mode .mode-bar { background: rgba(20,20,20,0.85); border-color: rgba(255,255,255,0.07); }
 body.img-mode .mode-btn { color: rgba(255,255,255,0.28); }
 body.img-mode .mode-btn.active { background: rgba(255,255,255,0.12); color: #f5f2ec; }
 body.img-mode .sentence-block { filter: blur(10px); pointer-events: none; user-select: none; }
@@ -81,9 +81,11 @@ body.ko-hide .sentence-ko { display: none; }
 .mode-bar {
   width: 100%; max-width: 660px;
   display: flex; gap: 6px;
-  background: rgba(26,26,26,0.06); border: 1px solid rgba(26,26,26,0.08);
+  background: rgba(245,242,236,0.85); border: 1px solid rgba(26,26,26,0.08);
   border-radius: 100px; padding: 4px; margin-bottom: 22px;
   transition: background 0.4s, border-color 0.4s;
+  position: sticky; top: 16px; z-index: 10;
+  backdrop-filter: blur(8px);
 }
 .mode-btn {
   flex: 1; background: transparent; border: none;
@@ -229,6 +231,7 @@ let totalDur = 0, mode = 'normal';
 let audioCtx = null, audioSrc = null, audioBuffer = null;
 let audioStart = 0, audioPaused = 0, audioPlaying = false, audioRaf = null;
 let scriptIndex = [];
+let userScrolling = false, scrollTimer = null;
 
 // ── Script list ───────────────────────────────────────────────────
 async function toggleList() {
@@ -381,7 +384,7 @@ function jumpTo(idx) {
 
 function hlSentence(idx) {
   sentences.forEach((s, i) => s.el.classList.toggle('active-sent', i === idx));
-  if (mode !== 'image' && sentences[idx])
+  if (mode !== 'image' && sentences[idx] && !userScrolling)
     sentences[idx].el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -424,6 +427,11 @@ loadIndex().then(() => {
   // 첫 번째 스크립트 자동 선택
   if (scriptIndex.length > 0) loadScript(scriptIndex[0].id);
 });
+window.addEventListener('scroll', () => {
+  userScrolling = true;
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => { userScrolling = false; }, 1500);
+}, { passive: true });
 window.addEventListener('beforeunload', () => { if (audioSrc) try { audioSrc.stop(); } catch(e){} });
 </script>
 </body>
