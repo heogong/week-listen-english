@@ -2,35 +2,31 @@
   {
     "id": "영화-한-장면-1774327463705",
     "title": "A Memorable Movie Scene",
-    "topic": "영화 한 장면",
     "level": "intermediate",
     "hasAudio": true
   },
   {
     "id": "movie-1774326284445",
     "title": "The Magic of Cinema",
-    "topic": "movie",
     "level": "intermediate",
     "hasAudio": true
   },
   {
     "id": "daily-life-1774319453862",
     "title": "The Intricacies of Modern Urban Living",
-    "topic": "Daily Life",
     "level": "advanced",
     "hasAudio": true
   },
   {
     "id": "daily-life-1774318485953",
     "title": "My Daily Routine",
-    "topic": "Daily Life",
     "level": "beginner",
     "hasAudio": true
   },
   {
     "id": "sarah-daily",
     "title": "Sarah's Daily Life",
-    "topic": "Daily Life",
-    "level": "beginner"
+    "level": "beginner",
+    "hasAudio": true
   }
 ]

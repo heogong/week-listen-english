@@ -130,7 +130,8 @@ async function generate() {
     const indexPath = path.join(__dirname, 'scripts', 'index.json');
     const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
     if (!index.find(s => s.id === scriptId)) {
-      index.unshift({ id: scriptId, title: data.title, topic: data.topic, level: data.level, hasAudio: true });
+      const createdAt = new Date().toISOString().slice(0, 10);
+      index.unshift({ id: scriptId, title: data.title, level: data.level, hasAudio: true, createdAt });
       fs.writeFileSync(indexPath, JSON.stringify(index, null, 2), 'utf-8');
     }
     console.log(`✓ Updated: scripts/index.json`);
