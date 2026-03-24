@@ -240,8 +240,9 @@ const RAW_BASE = '.';
 let currentId = null;
 let sentences = [];
 let totalDur = 0, mode = 'normal';
-let audioCtx = null, audioSrc = null, audioBuffer = null;
-let audioStart = 0, audioPaused = 0, audioPlaying = false, audioRaf = null;
+let audioRaf = null;
+const audio = new Audio();
+audio.addEventListener('ended', () => { audio.currentTime = 0; audio.play(); });
 let scriptIndex = [];
 let userScrolling = false, scrollTimer = null;
 let lastSentenceIdx = -1;
@@ -279,7 +280,7 @@ function renderList() {
 async function loadScript(id) {
   currentId = id;
   document.getElementById('scriptList').classList.remove('open');
-  stopAudio(); audioBuffer = null; audioPaused = 0; lastSentenceIdx = -1;
+  stopAudio(); audio.src = ''; lastSentenceIdx = -1;
   document.getElementById('playBtn').disabled = true;
   resetProgress();
   setStatus('불러오는 중...', 'yellow');
@@ -294,7 +295,14 @@ async function loadScript(id) {
     const data = await res.json();
     renderScript(data.sentences || []);
     setStatus('음성 불러오는 중...', 'yellow');
-    await fetchAudio(id);
+    const meta = scriptIndex.find(s => s.id === id);
+    const audioUrl = meta?.audioUrl || `${RAW_BASE}/audio/${id}.mp3`;
+    await fetchAudio(audioUrl);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: data.title, artist: 'Just Listen' });
+      navigator.mediaSession.setActionHandler('play', () => audioPlay());
+      navigator.mediaSession.setActionHandler('pause', () => audioPause());
+    }
     setStatus(`${data.title} — 재생 준비 완료`, 'green');
   } catch (e) {
     document.getElementById('scriptArea').innerHTML = `<div class="placeholder">${e.message}</div>`;
@@ -323,19 +331,22 @@ function renderScript(data) {
 }
 
 // ── Audio ─────────────────────────────────────────────────────────
-async function fetchAudio(id) {
-  // audio/ 폴더에 mp3가 있으면 로드 (GitHub Pages에서 서빙)
-  const res = await fetch(`${RAW_BASE}/audio/${id}.mp3`);
+async function fetchAudio(url) {
+  let res = await fetch(url);
+  if (!res.ok) {
+    const filename = url.split('/').pop();
+    res = await fetch(`./audio/${filename}`);
+  }
   if (!res.ok) throw new Error('음성 파일 없음');
-  const buf = await res.arrayBuffer();
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  audioBuffer = await audioCtx.decodeAudioData(buf);
+  const blob = new Blob([await res.arrayBuffer()], { type: 'audio/mpeg' });
+  audio.src = URL.createObjectURL(blob);
+  await new Promise((resolve, reject) => { audio.onloadedmetadata = resolve; audio.onerror = reject; });
   setupTimings();
   document.getElementById('playBtn').disabled = false;
 }
 
 function setupTimings() {
-  totalDur = audioBuffer.duration;
+  totalDur = audio.duration;
   const totalChars = sentences.reduce((a, s) => a + s.en.length, 0);
   let t = 0;
   sentences.forEach(s => {
@@ -347,42 +358,32 @@ function setupTimings() {
 }
 
 function audioPlay(from) {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  cancelAnimationFrame(audioRaf);
-  if (audioSrc) { audioSrc.onended = null; try { audioSrc.stop(); } catch(e){} audioSrc = null; }
-  const f = from !== undefined ? from : (audioPaused || 0);
-  audioPaused = 0;
-  audioStart = audioCtx.currentTime - f;
-  audioSrc = audioCtx.createBufferSource();
-  audioSrc.buffer = audioBuffer;
-  audioSrc.connect(audioCtx.destination);
-  audioSrc.start(0, f);
-  audioSrc.onended = () => { if (audioPlaying) audioPlay(0); };
-  audioPlaying = true; setIco(true); audioTick();
+  if (from !== undefined) audio.currentTime = from;
+  audio.play();
+  setIco(true); cancelAnimationFrame(audioRaf); audioTick();
 }
 
 function audioPause() {
-  if (audioCtx) audioPaused = audioCtx.currentTime - audioStart;
-  if (audioSrc) { audioSrc.onended = null; try { audioSrc.stop(); } catch(e){} audioSrc = null; }
-  audioPlaying = false; cancelAnimationFrame(audioRaf); setIco(false);
+  audio.pause();
+  cancelAnimationFrame(audioRaf); setIco(false);
 }
 
 function stopAudio() {
-  audioPause(); audioPaused = 0;
+  audio.pause(); audio.currentTime = 0;
 }
 
 function audioTick() {
-  const e = audioCtx.currentTime - audioStart;
+  const e = audio.currentTime;
   document.getElementById('fill').style.width = Math.min(e / totalDur * 100, 100) + '%';
   document.getElementById('tE').textContent = fmt(Math.min(e, totalDur));
   hlSentence(sentenceAtTime(e));
-  if (audioPlaying) audioRaf = requestAnimationFrame(audioTick);
+  if (!audio.paused) audioRaf = requestAnimationFrame(audioTick);
 }
 
 // ── Controls ──────────────────────────────────────────────────────
 function togglePlay() {
-  if (!audioBuffer) return;
-  audioPlaying ? audioPause() : audioPlay();
+  if (!audio.src) return;
+  audio.paused ? audioPlay() : audioPause();
 }
 
 function seekTo(ev) {
@@ -392,7 +393,7 @@ function seekTo(ev) {
 }
 
 function jumpTo(idx) {
-  if (sentences[idx] && audioBuffer) audioPlay(sentences[idx].startTime);
+  if (sentences[idx] && audio.src) audioPlay(sentences[idx].startTime);
 }
 
 let scrollRaf = null;
@@ -464,7 +465,7 @@ window.addEventListener('scroll', () => {
   clearTimeout(scrollTimer);
   scrollTimer = setTimeout(() => { userScrolling = false; }, 1500);
 }, { passive: true });
-window.addEventListener('beforeunload', () => { if (audioSrc) try { audioSrc.stop(); } catch(e){} });
+window.addEventListener('beforeunload', () => audio.pause());
 </script>
 </body>
 </html>
