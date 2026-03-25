@@ -2,6 +2,7 @@ require('dotenv').config();
 const Anthropic = require('@anthropic-ai/sdk');
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // ── CLI 인자 파싱 ─────────────────────────────────────────────────
 const args = process.argv.slice(2);
@@ -63,6 +64,13 @@ async function generateTTS(text, outputPath) {
   }
   if (chunks.length > 1) process.stdout.write('\n');
   fs.writeFileSync(outputPath, Buffer.concat(buffers));
+
+  // 볼륨 증폭 (ffmpeg)
+  const tmpPath = outputPath + '.tmp.mp3';
+  fs.renameSync(outputPath, tmpPath);
+  execSync(`ffmpeg -y -i "${tmpPath}" -filter:a "volume=2.0" "${outputPath}"`, { stdio: 'pipe' });
+  fs.unlinkSync(tmpPath);
+  console.log(`   Volume boosted (x2.0)`);
 }
 
 const FALLBACK_ID = 'sarah-daily';
