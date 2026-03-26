@@ -298,6 +298,7 @@ let listPage = 1;
 const PAGE_SIZE = 5;
 let userScrolling = false, scrollTimer = null;
 let lastSentenceIdx = -1;
+let pendingSeekTime = 0;
 
 // ── Script list ───────────────────────────────────────────────────
 async function toggleList() {
@@ -425,6 +426,10 @@ function setupTimings() {
 
 function audioPlay(from) {
   if (from !== undefined) audio.currentTime = from;
+  else if (pendingSeekTime > 0) {
+    audio.currentTime = pendingSeekTime;
+    pendingSeekTime = 0;
+  }
   audio.play();
   setIco(true); cancelAnimationFrame(audioRaf); audioTick();
 }
@@ -540,8 +545,7 @@ loadIndex().then(() => {
   const idToLoad = savedId && scriptIndex.find(s => s.id === savedId) ? savedId : scriptIndex[0]?.id;
   if (idToLoad) loadScript(idToLoad).then(() => {
     if (savedId === idToLoad && savedTime > 0) {
-      audio.addEventListener('seeked', audioTick, { once: true });
-      audio.currentTime = savedTime;
+      pendingSeekTime = savedTime;
     }
   });
 });
