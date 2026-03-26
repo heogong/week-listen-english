@@ -499,6 +499,7 @@ function setMode(m) {
   document.getElementById({ normal:'mNormal', kohide:'mKoHide', image:'mImage' }[m]).classList.add('active');
   document.body.classList.toggle('img-mode', m === 'image');
   document.body.classList.toggle('ko-hide', m === 'kohide');
+  localStorage.setItem('last_mode', m);
 }
 
 function setIco(p) {
@@ -520,18 +521,32 @@ function resetProgress() {
 
 function fmt(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m}:${String(sec).padStart(2,'0')}`; }
 
+// ── State persistence ──────────────────────────────────────────────
+function saveState() {
+  if (!currentId) return;
+  localStorage.setItem('last_id', currentId);
+  localStorage.setItem('last_time', audio.currentTime);
+}
+audio.addEventListener('pause', saveState);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
+window.addEventListener('pagehide', saveState);
+
 // ── Init ──────────────────────────────────────────────────────────
-// 페이지 로드 시 목록 미리 로드
 loadIndex().then(() => {
-  // 첫 번째 스크립트 자동 선택
-  if (scriptIndex.length > 0) loadScript(scriptIndex[0].id);
+  const savedId   = localStorage.getItem('last_id');
+  const savedTime = parseFloat(localStorage.getItem('last_time') || '0');
+  const savedMode = localStorage.getItem('last_mode');
+  if (savedMode) setMode(savedMode);
+  const idToLoad = savedId && scriptIndex.find(s => s.id === savedId) ? savedId : scriptIndex[0]?.id;
+  if (idToLoad) loadScript(idToLoad).then(() => {
+    if (savedId === idToLoad && savedTime > 0) audio.currentTime = savedTime;
+  });
 });
 window.addEventListener('scroll', () => {
   userScrolling = true;
   clearTimeout(scrollTimer);
   scrollTimer = setTimeout(() => { userScrolling = false; }, 1500);
 }, { passive: true });
-window.addEventListener('beforeunload', () => audio.pause());
 </script>
 </body>
 </html>
