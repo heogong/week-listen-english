@@ -539,7 +539,10 @@ loadIndex().then(() => {
   if (savedMode) setMode(savedMode);
   const idToLoad = savedId && scriptIndex.find(s => s.id === savedId) ? savedId : scriptIndex[0]?.id;
   if (idToLoad) loadScript(idToLoad).then(() => {
-    if (savedId === idToLoad && savedTime > 0) audio.currentTime = savedTime;
+    if (savedId === idToLoad && savedTime > 0) {
+      audio.currentTime = savedTime;
+      audioTick();
+    }
   });
 });
 window.addEventListener('scroll', () => {
