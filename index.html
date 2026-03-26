@@ -540,8 +540,8 @@ loadIndex().then(() => {
   const idToLoad = savedId && scriptIndex.find(s => s.id === savedId) ? savedId : scriptIndex[0]?.id;
   if (idToLoad) loadScript(idToLoad).then(() => {
     if (savedId === idToLoad && savedTime > 0) {
+      audio.addEventListener('seeked', audioTick, { once: true });
       audio.currentTime = savedTime;
-      audioTick();
     }
   });
 });
